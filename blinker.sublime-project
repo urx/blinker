@@ -1,0 +1,13 @@
+{
+	"folders":
+	[
+		{
+			"path": "."
+		}
+	],
+	"settings":
+	{
+		"sublimegdb_commandline": "gdb --interpreter=mi --args ./blinker",
+		"sublimegdb_workingdir": "/home/urx/projects/trash",
+	},
+}
