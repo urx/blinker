@@ -1,13 +1,38 @@
 {
+	"build_systems":
+	[
+		{
+			"cmd": ["make"],
+			"name": "build",
+			"working_dir": "${project_path}",
+		}
+	],
 	"folders":
 	[
 		{
 			"path": "."
 		}
 	],
+
+	"SublimeLinter":
+	{
+		"linters":
+		{
+			"clang":
+			{
+				"include_dirs":
+				[
+					"${project}/libopencm3/include/libopencm3/stm32/l1",
+					"${project}/libopencm3/include/libopencm3/stm32/common",
+					"${project}/libopencm3/include/libopencmsis/stm32/l1",
+				],
+
+			}
+		}
+	},
 	"settings":
 	{
-		"sublimegdb_commandline": "gdb --interpreter=mi --args ./blinker",
-		"sublimegdb_workingdir": "/home/urx/projects/trash",
+		"sublimegdb_commandline": "/Users/jurets/soft/gcc-arm-none-eabi-7-2017-q4-major/bin/arm-none-eabi-gdb --interpreter=mi --args /Users/jurets/projects/blinker/blinker.elf",
+		"sublimegdb_workingdir": "${folder:${project_path:/blinker.elf}}",
 	},
 }
