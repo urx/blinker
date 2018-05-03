@@ -1,0 +1,27 @@
+*.d
+*.o
+*.bin
+*.hex
+*.list
+*.srec
+*.a
+*.elf
+*.stylecheck
+*.swp
+\#*
+.\#*
+*~
+*.map
+*.log
+*.pyc
+*.pdf
+*.tag
+.DS_Store
+# These are generated
+
+# Editor/IDE config files
+nbproject/
+.idea/
+.project
+blinker.sublime-workspace
+
