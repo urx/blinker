@@ -1,5 +1,12 @@
+#ifdef X86_DEBUG
 #include <stdio.h>
 #include <stdint.h>
+#endif
+
+#include <libopencm3/cm3/nvic.h>
+#include <libopencm3/stm32/rcc.h>
+#include <libopencm3/stm32/gpio.h>
+#include <libopencm3/stm32/timer.h>
 
 
 uint8_t leds_mask = 0;
@@ -53,15 +60,20 @@ struct led_timeslots_counters ltsc = {
 
 void dump_ltsc()
 {
+#ifdef X86_DEBUG
     printf("ltsc: %04d %03d ", ltsc.red, ltsc.green);
+#endif
 }
 
 void dump_leds()
 {
+#ifdef X86_DEBUG
     if (leds_mask & RED_ON) printf("R");
     if (leds_mask & GREEN_ON) printf("G");
     if (leds_mask & BLUE_ON) printf("B");
+
     printf("\n");
+#endif
 }
 
 void update_state()
@@ -85,8 +97,39 @@ void update_state()
 
 int main()
 {
+    int i = 0;
+    rcc_clock_setup_pll(&rcc_clock_config[RCC_CLOCK_VRANGE1_HSI_RAW_16MHZ]);
+    rcc_periph_clock_enable(RCC_GPIOB);
+    gpio_mode_setup(GPIOB, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO7|GPIO8);
+
+    rcc_periph_clock_enable(RCC_TIM2);
+    nvic_enable_irq(NVIC_TIM2_IRQ);
+    rcc_periph_reset_pulse(RST_TIM2);
+    timer_set_mode(TIM2, TIM_CR1_CKD_CK_INT,
+                TIM_CR1_CMS_EDGE, TIM_CR1_DIR_UP);
+    timer_set_prescaler(TIM2, ((rcc_apb1_frequency * 2) / 5000));
+    timer_disable_preload(TIM2);
+    timer_continuous_mode(TIM2);
+    timer_set_period(TIM2, 65535);
+    timer_set_oc_value(TIM2, TIM_OC1, 500);
+    timer_enable_counter(TIM2);
+    timer_enable_irq(TIM2, TIM_DIER_CC1IE);
+
+
+
+    
+    while(1) {
+        gpio_toggle(GPIOB, GPIO7);
+        for(i = 0; i < 1000000; i++) {
+            __asm__("nop");
+        }
+    }
+
+
     for (timeslot = 0; timeslot < 2000; timeslot++) {
+#ifdef X86_DEBUG
         printf("timeslot: %04d ", timeslot);
+#endif
         blinker_FSM();
         dump_leds();
         update_state();
@@ -96,6 +139,15 @@ int main()
 void burn_leds(uint8_t mask)
 {
     leds_mask = mask;
+}
+
+void tim2_isr(void)
+{
+    if(timer_get_flag(TIM2, TIM_SR_CC1IF)) {
+        timer_clear_flag(TIM2, TIM_SR_CC1IF);
+        gpio_toggle(GPIOB, GPIO8);
+    }
+    __asm__("nop");
 }
 
 
